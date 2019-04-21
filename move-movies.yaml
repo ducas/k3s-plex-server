@@ -1,0 +1,29 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: move-movies
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: movie-maid
+            image: ducas/movie-maid:0.1.1
+            args: ['-p', '-s', '/library/sync/sync-data/Downloads/Movies', '-d', '/library/media/movies']
+            env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            volumeMounts:
+            - mountPath: "/library"
+              name: library
+          restartPolicy: OnFailure
+          volumes:
+          - name: library
+            hostPath:
+              path: /mnt/library
+              type: Directory

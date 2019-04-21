@@ -1,0 +1,47 @@
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: sync
+  labels:
+    app: sync
+spec:
+  volumes:
+    - name: sync-storage
+      persistentVolumeClaim:
+       claimName: sync-volume-claim
+  containers:
+    - name: resilio-sync
+      image: linuxserver/resilio-sync:2.6.3-ls8
+      env:
+      - name: PUID
+        value: "1000"
+      - name: PGID
+        value: "1000"
+      - name: TZ
+        value: Australia/Sydney
+      - name: UMASK_SET
+        value: "<022>"
+      hostNetwork: true
+      ports:
+        - containerPort: 8888
+          hostPort: 8888
+          name: "http"
+        - containerPort: 55555
+          hostPort: 55555
+          name: "sync"
+      volumeMounts:
+        - mountPath: "/config"
+          name: sync-storage
+          subPath: "config"
+        - mountPath: "/downloads"
+          name: sync-storage
+          subPath: "downloads"
+        - mountPath: "/sync"
+          name: sync-storage
+          subPath: "sync-data"
+  volumes:
+    - name: sync-storage
+      hostPath:
+        path: /mnt/library/sync
+        type: Directory

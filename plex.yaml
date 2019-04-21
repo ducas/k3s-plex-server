@@ -1,0 +1,66 @@
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: plex
+  labels:
+    app: plex
+spec:
+  hostNetwork: true
+  containers:
+    - name: plex
+      image: linuxserver/plex:1.15.3.876-ad6e39743-ls18
+      env:
+      - name: PUID
+        value: "1000"
+      - name: PGID
+        value: "1000"
+      - name: TZ
+        value: Australia/Sydney
+      - name: VERSION
+        value: docker
+      ports:
+        - containerPort: 32400
+          hostPort: 32400
+          protocol: TCP
+        - containerPort: 32400
+          hostPort: 32400
+          protocol: UDP
+        - containerPort: 32469
+          hostPort: 32469
+          protocol: TCP
+        - containerPort: 32469
+          hostPort: 32469
+          protocol: UDP
+        - containerPort: 5353
+          hostPort: 5353
+          protocol: UDP
+        - containerPort: 1900
+          hostPort: 1900
+          protocol: UDP
+      volumeMounts:
+        - mountPath: "/config"
+          name: plex-storage
+          subPath: "config"
+        - mountPath: "/media/tv"
+          name: media-storage
+          subPath: "tvshows"
+        - mountPath: "/media/movies"
+          name: media-storage
+          subPath: "movies"
+        - mountPath: "/media/music"
+          name: media-storage
+          subPath: "music"
+        - mountPath: "/transcode"
+          name: plex-storage
+          subPath: "transcode"
+  volumes:
+    - name: plex-storage
+      hostPath:
+        path: /mnt/library/plex
+        type: Directory
+    - name: media-storage
+      hostPath:
+        path: /mnt/library/media
+        type: Directory
+
